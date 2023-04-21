@@ -45,7 +45,6 @@ sub_0: assembly {
       0x00
         /* "dup_opt_peephole/input.sol":150:162  sstore(0, x) */
       sstore
-        /* "dup_opt_peephole/input.sol":107:166  {... */
       stop
 
     auxdata: <AUXDATA REMOVED>

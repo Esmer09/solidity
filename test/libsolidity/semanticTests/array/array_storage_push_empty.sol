@@ -13,11 +13,11 @@ contract C {
 // ----
 // pushEmpty(uint256): 128
 // gas irOptimized: 406798
-// gas legacy: 416903
+// gas legacy: 417287
 // gas legacyOptimized: 398280
 // pushEmpty(uint256): 256
 // gas irOptimized: 693826
-// gas legacy: 717115
+// gas legacy: 717883
 // gas legacyOptimized: 690172
 // pushEmpty(uint256): 38869 -> FAILURE # out-of-gas #
 // gas irOptimized: 100000000

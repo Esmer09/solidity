@@ -60,9 +60,9 @@ contract C {
 // ----
 // test_bytes() ->
 // gas irOptimized: 362400
-// gas legacy: 414569
+// gas legacy: 416939
 // gas legacyOptimized: 319271
 // test_uint256() ->
 // gas irOptimized: 511451
-// gas legacy: 581876
+// gas legacy: 585812
 // gas legacyOptimized: 442757
