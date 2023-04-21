@@ -497,7 +497,10 @@ std::optional<Json::Value> checkOptimizerDetailSteps(Json::Value const& _details
 			if (delimiterPos != string::npos)
 				_cleanupSetting = fullSequence.substr(delimiterPos + 1);
 			else
-				solAssert(_cleanupSetting == OptimiserSettings::DefaultYulOptimiserCleanupSteps);
+				solAssert(
+					_cleanupSetting == OptimiserSettings::StandardYulOptimiserCleanupSteps ||
+					_cleanupSetting == OptimiserSettings::MinimalYulOptimiserCleanupSteps
+				);
 		}
 		else
 			return formatFatalError(Error::Type::JSONError, "\"settings.optimizer.details." + _name + "\" must be a string");
@@ -576,6 +579,7 @@ std::variant<OptimiserSettings, Json::Value> parseOptimizerSettings(Json::Value 
 		return *result;
 
 	OptimiserSettings settings = OptimiserSettings::minimal();
+	bool yulOptimizerRequested = false;
 
 	if (_jsonInput.isMember("enabled"))
 	{
@@ -583,7 +587,10 @@ std::variant<OptimiserSettings, Json::Value> parseOptimizerSettings(Json::Value 
 			return formatFatalError(Error::Type::JSONError, "The \"enabled\" setting must be a Boolean.");
 
 		if (_jsonInput["enabled"].asBool())
+		{
 			settings = OptimiserSettings::standard();
+			yulOptimizerRequested = true;
+		}
 	}
 
 	if (_jsonInput.isMember("runs"))
@@ -613,12 +620,20 @@ std::variant<OptimiserSettings, Json::Value> parseOptimizerSettings(Json::Value 
 			return *error;
 		if (auto error = checkOptimizerDetail(details, "constantOptimizer", settings.runConstantOptimiser))
 			return *error;
-		if (auto error = checkOptimizerDetail(details, "yul", settings.runYulOptimiser))
+
+		if (auto error = checkOptimizerDetail(details, "yul", yulOptimizerRequested))
 			return *error;
-		settings.optimizeStackAllocation = settings.runYulOptimiser;
+
+		if (yulOptimizerRequested)
+			settings.copyYulSettingsFrom(OptimiserSettings::standard());
+		else
+			// NOTE: We want Yul optimizer to run regardless of the `yul` setting, just with minimal steps.
+			// This is the minimum necessary to avoid running into "Stack too deep" constantly.
+			settings.copyYulSettingsFrom(OptimiserSettings::minimal());
+
 		if (details.isMember("yulDetails"))
 		{
-			if (!settings.runYulOptimiser)
+			if (!yulOptimizerRequested)
 				return formatFatalError(Error::Type::JSONError, "\"Providing yulDetails requires Yul optimizer to be enabled.");
 
 			if (auto result = checkKeys(details["yulDetails"], {"stackAllocation", "optimizerSteps"}, "settings.optimizer.details.yulDetails"))

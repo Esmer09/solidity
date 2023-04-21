@@ -446,8 +446,8 @@ BOOST_AUTO_TEST_CASE(invalid_options_input_modes_combinations)
 BOOST_AUTO_TEST_CASE(default_optimiser_sequence)
 {
 	CommandLineOptions const& commandLineOptions = parseCommandLine({"solc", "contract.sol", "--optimize"});
-	BOOST_CHECK_EQUAL(commandLineOptions.optimiserSettings().yulOptimiserSteps, OptimiserSettings::DefaultYulOptimiserSteps);
-	BOOST_CHECK_EQUAL(commandLineOptions.optimiserSettings().yulOptimiserCleanupSteps, OptimiserSettings::DefaultYulOptimiserCleanupSteps);
+	BOOST_CHECK_EQUAL(commandLineOptions.optimiserSettings().yulOptimiserSteps, OptimiserSettings::StandardYulOptimiserSteps);
+	BOOST_CHECK_EQUAL(commandLineOptions.optimiserSettings().yulOptimiserCleanupSteps, OptimiserSettings::StandardYulOptimiserCleanupSteps);
 }
 
 BOOST_AUTO_TEST_CASE(valid_optimiser_sequences)
@@ -469,9 +469,9 @@ BOOST_AUTO_TEST_CASE(valid_optimiser_sequences)
 		{"dhfoDgvulfnTUtnIf", ""},
 		{"dhfoDgvulfnTUtnIf", "fDn"},
 		{"dhfo[Dgvulfn]TUtnIf", "f[D]n"},
-		{"dhfoDgvulfnTUtnIf", OptimiserSettings::DefaultYulOptimiserCleanupSteps},
-		{"iDu", OptimiserSettings::DefaultYulOptimiserCleanupSteps},
-		{"a[[a][[aa]aa[aa]][]]aaa[aa[aa[aa]]]a[a][a][a]a[a]", OptimiserSettings::DefaultYulOptimiserCleanupSteps}
+		{"dhfoDgvulfnTUtnIf", OptimiserSettings::StandardYulOptimiserCleanupSteps},
+		{"iDu", OptimiserSettings::StandardYulOptimiserCleanupSteps},
+		{"a[[a][[aa]aa[aa]][]]aaa[aa[aa[aa]]]a[a][a][a]a[a]", OptimiserSettings::StandardYulOptimiserCleanupSteps}
 	};
 
 	BOOST_CHECK_EQUAL(validSequenceInputs.size(), expectedParsedSequences.size());

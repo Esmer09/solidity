@@ -25,6 +25,8 @@
 
 #include <liblangutil/Exceptions.h>
 
+#include <libsolutil/Assertions.h>
+
 #include <cstddef>
 #include <string>
 
@@ -41,7 +43,7 @@ enum class OptimisationPreset
 
 struct OptimiserSettings
 {
-	static char constexpr DefaultYulOptimiserSteps[] =
+	static char constexpr StandardYulOptimiserSteps[] =
 		"dhfoDgvulfnTUtnIf"            // None of these can make stack problems worse
 		"["
 			"xa[r]EscLM"               // Turn into SSA and simplify
@@ -59,7 +61,10 @@ struct OptimiserSettings
 		"]"
 		"jmul[jul] VcTOcul jmul";      // Make source short and pretty
 
-	static char constexpr DefaultYulOptimiserCleanupSteps[] = "fDnTOc";
+	static char constexpr StandardYulOptimiserCleanupSteps[] = "fDnTOc";
+
+	static char constexpr MinimalYulOptimiserSteps[] = "u";
+	static char constexpr MinimalYulOptimiserCleanupSteps[] = "";
 
 	/// No optimisations at all - not recommended.
 	static OptimiserSettings none()
@@ -72,6 +77,8 @@ struct OptimiserSettings
 		OptimiserSettings s = none();
 		s.runJumpdestRemover = true;
 		s.runPeephole = true;
+		s.runYulOptimiser = true;
+		s.optimizeStackAllocation = true;
 		return s;
 	}
 	/// Standard optimisations.
@@ -87,6 +94,8 @@ struct OptimiserSettings
 		s.runConstantOptimiser = true;
 		s.runYulOptimiser = true;
 		s.optimizeStackAllocation = true;
+		s.yulOptimiserSteps = StandardYulOptimiserSteps;
+		s.yulOptimiserCleanupSteps = StandardYulOptimiserCleanupSteps;
 		return s;
 	}
 	/// Full optimisations. Currently an alias for standard optimisations.
@@ -103,8 +112,8 @@ struct OptimiserSettings
 			case OptimisationPreset::Minimal: return minimal();
 			case OptimisationPreset::Standard: return standard();
 			case OptimisationPreset::Full: return full();
-			default: solAssert(false, "");
 		}
+		util::unreachable();
 	}
 
 	bool operator==(OptimiserSettings const& _other) const
@@ -121,6 +130,14 @@ struct OptimiserSettings
 			runYulOptimiser == _other.runYulOptimiser &&
 			yulOptimiserSteps == _other.yulOptimiserSteps &&
 			expectedExecutionsPerDeployment == _other.expectedExecutionsPerDeployment;
+	}
+
+	void copyYulSettingsFrom(OptimiserSettings const& _other)
+	{
+		runYulOptimiser = _other.runYulOptimiser;
+		optimizeStackAllocation = _other.optimizeStackAllocation;
+		yulOptimiserSteps = _other.yulOptimiserSteps;
+		yulOptimiserCleanupSteps = _other.yulOptimiserCleanupSteps;
 	}
 
 	/// Move literals to the right of commutative binary operators during code generation.
@@ -147,11 +164,11 @@ struct OptimiserSettings
 	/// Note that there are some hard-coded steps in the optimiser and you cannot disable
 	/// them just by setting this to an empty string. Set @a runYulOptimiser to false if you want
 	/// no optimisations.
-	std::string yulOptimiserSteps = DefaultYulOptimiserSteps;
+	std::string yulOptimiserSteps = MinimalYulOptimiserSteps;
 	/// Sequence of clean-up optimisation steps after yulOptimiserSteps is run. Note that if the string
 	/// is left empty, there will still be hard-coded optimisation steps that will run regardless.
 	/// Set @a runYulOptimiser to false if you want no optimisations.
-	std::string yulOptimiserCleanupSteps = DefaultYulOptimiserCleanupSteps;
+	std::string yulOptimiserCleanupSteps = MinimalYulOptimiserCleanupSteps;
 	/// This specifies an estimate on how often each opcode in this assembly will be executed,
 	/// i.e. use a small value to optimise for size and a large value to optimise for runtime gas usage.
 	size_t expectedExecutionsPerDeployment = 200;

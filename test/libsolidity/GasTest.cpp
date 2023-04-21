@@ -107,11 +107,7 @@ TestCase::TestResult GasTest::run(ostream& _stream, string const& _linePrefix, b
 	// release mode for testing gas estimates.
 	compiler().setMetadataFormat(CompilerStack::MetadataFormat::NoMetadata);
 	OptimiserSettings settings = m_optimise ? OptimiserSettings::standard() : OptimiserSettings::minimal();
-	if (m_optimiseYul)
-	{
-		settings.runYulOptimiser = m_optimise;
-		settings.optimizeStackAllocation = m_optimise;
-	}
+	settings.copyYulSettingsFrom(m_optimiseYul ? OptimiserSettings::standard() : OptimiserSettings::minimal());
 	settings.expectedExecutionsPerDeployment = m_optimiseRuns;
 	compiler().setOptimiserSettings(settings);
 	compiler().setSources({{"", preamble + m_source}});

@@ -267,7 +267,15 @@ OptimiserSettings CommandLineOptions::optimiserSettings() const
 		settings = OptimiserSettings::minimal();
 
 	if (optimizer.noOptimizeYul)
-		settings.runYulOptimiser = false;
+	{
+		// The code below overwrites optimizer steps. Fortunately, providing them without enabling
+		// the Yul optimizer is not allowed.
+		solAssert(!optimizer.yulSteps.has_value());
+
+		// NOTE: --no-optimize-yul still leaves runYulOptimiser enabled, just with minimal steps.
+		// This is the minimum necessary to avoid running into "Stack too deep" constantly.
+		settings.copyYulSettingsFrom(OptimiserSettings::minimal());
+	}
 
 	if (optimizer.expectedExecutionsPerDeployment.has_value())
 		settings.expectedExecutionsPerDeployment = optimizer.expectedExecutionsPerDeployment.value();
@@ -281,7 +289,12 @@ OptimiserSettings CommandLineOptions::optimiserSettings() const
 		if (delimiterPos != string::npos)
 			settings.yulOptimiserCleanupSteps = fullSequence.substr(delimiterPos + 1);
 		else
-			solAssert(settings.yulOptimiserCleanupSteps == OptimiserSettings::DefaultYulOptimiserCleanupSteps);
+		{
+			if (optimizer.enabled && !optimizer.noOptimizeYul)
+				solAssert(settings.yulOptimiserCleanupSteps == OptimiserSettings::StandardYulOptimiserCleanupSteps);
+			else
+				solAssert(settings.yulOptimiserCleanupSteps == OptimiserSettings::MinimalYulOptimiserCleanupSteps);
+		}
 	}
 
 	return settings;
@@ -1164,8 +1177,7 @@ void CommandLineParser::processArgs()
 
 	if (m_args.count(g_strYulOptimizations))
 	{
-		OptimiserSettings optimiserSettings = m_options.optimiserSettings();
-		if (!optimiserSettings.runYulOptimiser)
+		if (!m_options.optimizer.enabled || m_options.optimizer.noOptimizeYul)
 			solThrow(CommandLineValidationError, "--" + g_strYulOptimizations + " is invalid if Yul optimizer is disabled");
 
 		try

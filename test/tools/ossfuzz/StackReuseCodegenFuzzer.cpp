@@ -75,8 +75,7 @@ DEFINE_PROTO_FUZZER(Program const& _input)
 	YulStringRepository::reset();
 
 	solidity::frontend::OptimiserSettings settings = solidity::frontend::OptimiserSettings::full();
-	settings.runYulOptimiser = false;
-	settings.optimizeStackAllocation = false;
+	settings.copyYulSettingsFrom(solidity::frontend::OptimiserSettings::minimal());
 	bytes unoptimisedByteCode;
 	try
 	{
@@ -118,8 +117,7 @@ DEFINE_PROTO_FUZZER(Program const& _input)
 	ostringstream unoptimizedState;
 	unoptimizedState << EVMHostPrinter{hostContext, deployResult.create_address}.state();
 
-	settings.runYulOptimiser = true;
-	settings.optimizeStackAllocation = true;
+	settings.copyYulSettingsFrom(solidity::frontend::OptimiserSettings::full());
 	bytes optimisedByteCode;
 	try
 	{

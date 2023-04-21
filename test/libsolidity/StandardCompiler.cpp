@@ -1251,7 +1251,7 @@ BOOST_AUTO_TEST_CASE(optimizer_settings_details_different)
 	BOOST_CHECK(optimizer["details"]["yulDetails"]["stackAllocation"].asBool() == true);
 	BOOST_CHECK(
 		optimizer["details"]["yulDetails"]["optimizerSteps"].asString() ==
-		OptimiserSettings::DefaultYulOptimiserSteps + ":"s + OptimiserSettings::DefaultYulOptimiserCleanupSteps
+		OptimiserSettings::StandardYulOptimiserSteps + ":"s + OptimiserSettings::StandardYulOptimiserCleanupSteps
  	);
 	BOOST_CHECK_EQUAL(optimizer["details"].getMemberNames().size(), 9);
 	BOOST_CHECK(optimizer["runs"].asUInt() == 600);
@@ -1421,7 +1421,7 @@ BOOST_AUTO_TEST_CASE(use_stack_optimization)
 
 	// Now disable stack optimizations and UnusedFunctionParameterPruner (p)
 	// results in "stack too deep"
-	string optimiserSteps = OptimiserSettings::DefaultYulOptimiserSteps;
+	string optimiserSteps = OptimiserSettings::StandardYulOptimiserSteps;
 	optimiserSteps.erase(
 		remove_if(optimiserSteps.begin(), optimiserSteps.end(), [](char ch) { return ch == 'p'; }),
 		optimiserSteps.end()

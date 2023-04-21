@@ -57,7 +57,7 @@ ObjectCompilerTest::ObjectCompilerTest(string const& _filename):
 			{"standard", OptimisationPreset::Standard},
 			{"full", OptimisationPreset::Full},
 		},
-		"minimal"
+		"none"
 	);
 	m_wasm = m_reader.boolSetting("wasm", false);
 	m_expectation = m_reader.simpleExpectations();
